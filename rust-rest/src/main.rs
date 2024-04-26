@@ -1,4 +1,5 @@
 use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
+use serde::Serialize;
 use std::io::{Error, ErrorKind};
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -16,7 +17,7 @@ impl FromStr for QuestionId {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 struct Question {
     id: QuestionId,
     title: String,
@@ -24,7 +25,7 @@ struct Question {
     tags: Option<Vec<String>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Serialize)]
 struct QuestionId(String);
 
 //Func for new instance of Question
