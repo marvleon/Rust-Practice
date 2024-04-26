@@ -43,7 +43,7 @@ impl Question {
 #[tokio::main]
 async fn main() {
     //Router with route to handle GET requests
-    let app = Router::new().route("/", get(hello_world));
+    let app = Router::new().route("/hello", get(|| async { "Hello,World!" }));
 
     //Address to serve on
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
@@ -53,11 +53,6 @@ async fn main() {
         .serve(app.into_make_service())
         .await
         .unwrap();
-}
-
-//Handler function for root route
-async fn hello_world() -> impl IntoResponse {
-    (StatusCode::OK, "Hello, World!!")
 }
 
 //Implementation of Dipslay trait for struct Question
