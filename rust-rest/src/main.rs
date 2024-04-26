@@ -1,4 +1,9 @@
-use axum::{http::StatusCode, response::IntoResponse, routing::get, Json, Router};
+use axum::{
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    routing::get,
+    Json, Router,
+};
 use serde::Serialize;
 use std::io::{Error, ErrorKind};
 use std::net::SocketAddr;
@@ -44,7 +49,10 @@ impl Question {
 #[tokio::main]
 async fn main() {
     //Router with route to handle GET requests
-    let app = Router::new().route("/hello", get(|| async { "Hello,World!" }));
+    let app = Router::new().route(
+        "/hello",
+        get(|| async { "Hello,World!" }).fallback(handler_not_found),
+    );
 
     //Address to serve on
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
@@ -63,7 +71,11 @@ async fn get_questions() -> impl IntoResponse {
         "Content of question".to_string(),
         Some(vec!["faq".to_string()]),
     );
-    Json(question)
+    Json(question) //Return statement 200 OK with JSON serialized data
+}
+
+async fn handler_not_found() -> Response {
+    (StatusCode::NOT_FOUND, "404 Not Found").into_response()
 }
 //Implementation of Dipslay trait for struct Question
 //Enables custom string formatting of Question instances
