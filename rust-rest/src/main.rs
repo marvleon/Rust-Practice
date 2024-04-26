@@ -1,5 +1,6 @@
-use axum::{routing::get, Router};
+use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
 use std::io::{Error, ErrorKind};
+use std::net::SocketAddr;
 use std::str::FromStr;
 
 //Custom parsing for converting string to QuestionId
@@ -41,8 +42,22 @@ impl Question {
 
 #[tokio::main]
 async fn main() {
-    let hello = axum::get().map(|| format!("Hello, World!!"));
-    axum::serve(hello).run(([127, 0, 0, 1], 3030)).await;
+    //Router with route to handle GET requests
+    let app = Router::new().route("/", get(hello_world));
+
+    //Address to serve on
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
+
+    println!("Listening on {}", addr);
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+}
+
+//Handler function for root route
+async fn hello_world() -> impl IntoResponse {
+    (StatusCode::OK, "Hello, World!!")
 }
 
 //Implementation of Dipslay trait for struct Question
