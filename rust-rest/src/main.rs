@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, response::IntoResponse, routing::get, Router};
+use axum::{http::StatusCode, response::IntoResponse, routing::get, Json, Router};
 use serde::Serialize;
 use std::io::{Error, ErrorKind};
 use std::net::SocketAddr;
@@ -56,6 +56,15 @@ async fn main() {
         .unwrap();
 }
 
+async fn get_questions() -> impl IntoResponse {
+    let question = Question::new(
+        QuestionId::from_str("1").expect("No id provided"),
+        "First Questions".to_string(),
+        "Content of question".to_string(),
+        Some(vec!["faq".to_string()]),
+    );
+    Json(question)
+}
 //Implementation of Dipslay trait for struct Question
 //Enables custom string formatting of Question instances
 //Displays the question struct in a formatted string
