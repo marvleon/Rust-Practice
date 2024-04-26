@@ -7,7 +7,7 @@ pub struct QuestionId(String);
 
 #[derive(Debug, Clone, Serialize)]
 pub struct Question {
-    id: QuestionId,
+    id: String,
     title: String,
     content: String,
     tags: Option<Vec<String>>,
@@ -16,8 +16,8 @@ pub struct Question {
 //Func for new instance of Question
 //Takes ownership of input parameters and puts them to respective properties of Question struct
 impl Question {
-    pub fn new(id: usize, title: &str, content: &str, tags: Option<Vec<String>>) -> Self {
-        let id = QuestionId(id.to_string());
+    pub fn new(id: &str, title: &str, content: &str, tags: Option<Vec<String>>) -> Self {
+        let id = id.into();
         let title = title.into();
         let content = content.into();
         Self {

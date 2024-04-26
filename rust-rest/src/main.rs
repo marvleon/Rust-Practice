@@ -26,7 +26,7 @@ async fn main() {
 
 async fn get_questions() -> impl IntoResponse {
     let question = Question::new(
-        1,
+        "1",
         "First Questions",
         "Content of question",
         Some(vec!["faq".to_string()]),
