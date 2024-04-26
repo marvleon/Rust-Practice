@@ -49,10 +49,7 @@ impl Question {
 #[tokio::main]
 async fn main() {
     //Router with route to handle GET requests
-    let app = Router::new().route(
-        "/hello",
-        get(|| async { "Hello,World!" }).fallback(handler_not_found),
-    );
+    let app = Router::new().route("/hello", get(get_questions).fallback(handler_not_found));
 
     //Address to serve on
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
