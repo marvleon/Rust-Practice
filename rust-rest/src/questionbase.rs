@@ -1,8 +1,7 @@
 use crate::*;
-use std::collections::HashMap;
 #[derive(Clone)]
 pub struct QuestionBase {
-    questions: HashMap<String, Question>,
+    pub questions: HashMap<String, Question>,
 }
 
 impl QuestionBase {
@@ -18,14 +17,14 @@ impl QuestionBase {
     }
 }
 
-impl Default for QuestionBase {
-    fn default() -> Self {
-        Self::new()
-    }
-}
-
 impl IntoResponse for &QuestionBase {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(&self.questions)).into_response()
+    }
+}
+
+impl Default for QuestionBase {
+    fn default() -> Self {
+        Self::new()
     }
 }
