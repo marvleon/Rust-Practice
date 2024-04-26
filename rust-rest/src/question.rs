@@ -1,11 +1,11 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind};
 use std::str::FromStr;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize)]
 pub struct QuestionId(String);
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Question {
     id: String,
     title: String,

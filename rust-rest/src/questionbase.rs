@@ -1,27 +1,31 @@
 use crate::*;
 use std::collections::HashMap;
-
-struct Store {
-    questions: HashMap<QuestionId, Question>,
+#[derive(Clone)]
+pub struct QuestionBase {
+    questions: HashMap<String, Question>,
 }
 
-impl Store {
-    fn new() -> Self {
-        Store {
-            questions: HashMap::new(),
+impl QuestionBase {
+    pub fn new() -> Self {
+        QuestionBase {
+            questions: Self::init(),
         }
     }
-    fn init(self) -> Self {
-        let question = Question::new(
-            "1",
-            "How?".to_string(),
-            "Please help".to_string(),
-            Some(vec!["general".to_string()]),
-        );
-        self.add_question(question)
+
+    pub fn init() -> HashMap<String, Question> {
+        let file = include_str!("../questions.json");
+        serde_json::from_str(file).expect("can't read questions.json!")
     }
-    fn add_question(mut self, question: Question) -> Self {
-        self.questions.insert(question.id.clone(), question);
-        self
+}
+
+impl Default for QuestionBase {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl IntoResponse for &QuestionBase {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(&self.questions)).into_response()
     }
 }

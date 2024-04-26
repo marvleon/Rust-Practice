@@ -1,8 +1,14 @@
 {
-  "1": {
+  "q1": {
     "id": "1",
     "title": "How?",
     "content": "Please help!",
+    "tags": ["general"]
+  },
+  "q2": {
+    "id": "2",
+    "title": "What?",
+    "content": "help!",
     "tags": ["general"]
   }
 }
