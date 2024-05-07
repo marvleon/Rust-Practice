@@ -13,7 +13,7 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-use tower_http::cors::{Any, CorsLayer};
+//use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct Question {
@@ -38,15 +38,13 @@ struct AnswerId(String);
 
 #[derive(Clone)]
 struct Store {
-    questions: Arc<Mutex<HashMap<QuestionId, Question>>>,
-    answers: Arc<Mutex<HashMap<AnswerId, Answer>>>,
+    questions: HashMap<QuestionId, Question>,
 }
 
 impl Store {
     fn new() -> Self {
         Store {
-            questions: Arc::new(Mutex::new(Self::init())),
-            answers: Arc::new(Mutex::new(HashMap::new())),
+            questions: (Self::init()),
         }
     }
 
@@ -83,26 +81,40 @@ impl IntoResponse for Error {
 }
 
 // Hanlder for get_questions
+// Hanlder for get_questions
 async fn get_questions(
     Query(params): Query<HashMap<String, String>>,
     State(store): State<Arc<Mutex<Store>>>,
 ) -> Result<Json<Vec<Question>>, Error> {
     let store = store.lock().await;
-    if !params.is_empty() {
-        let start = params
-            .get("start")
-            .and_then(|v| v.parse::<usize>().ok())
-            .ok_or(Error::MissingParameters)?;
-        let end = params
-            .get("end")
-            .and_then(|v| v.parse::<usize>().ok())
-            .ok_or(Error::MissingParameters)?;
-        let res: Vec<Question> = store.questions.lock().await.values().cloned().collect();
-        Ok(Json(res[start..end].to_vec()))
-    } else {
-        let res: Vec<Question> = store.questions.lock().await.values().cloned().collect();
-        Ok(Json(res))
+
+    if params.is_empty() {
+        return Err(Error::MissingParameters);
     }
+
+    let start = params
+        .get("start")
+        .and_then(|v| v.parse::<usize>().ok())
+        .ok_or(Error::ParseError("Invalid start parameter".to_string()))?;
+
+    let end = params
+        .get("end")
+        .and_then(|v| v.parse::<usize>().ok())
+        .ok_or(Error::ParseError("Invalid end parameter".to_string()))?;
+
+    if start >= end {
+        return Err(Error::ParseError(
+            "End parameter must be greater than start".to_string(),
+        ));
+    }
+
+    let res: Vec<Question> = store.questions.values().cloned().collect();
+
+    if start >= res.len() || end > res.len() {
+        return Err(Error::QuestionNotFound);
+    }
+
+    Ok(Json(res[start..end].to_vec()))
 }
 
 // Handler to add a new question
@@ -110,14 +122,11 @@ async fn add_question(
     State(store): State<Arc<Mutex<Store>>>,
     Json(question): Json<Question>,
 ) -> impl IntoResponse {
-    //access the Store object first by acquiring a write lock
-    let store = store.lock().await;
+    //Access the Store object first by acquiring a write lock
+    let mut store = store.lock().await;
 
-    //access the questions Arc<Mutex<HashMap>> and then acquire a write lock
-    let mut questions = store.questions.lock().await;
-
-    //insert the question into the HashMap
-    questions.insert(question.id.clone(), question);
+    //Insert the question into the HashMap
+    store.questions.insert(question.id.clone(), question);
 
     //Return a response
     Response::builder()
@@ -132,51 +141,53 @@ async fn update_question(
     Path(question_id): Path<QuestionId>,
     Json(updated_question): Json<Question>,
 ) -> impl IntoResponse {
-    // Access the Store object first by acquiring a write lock
-    let store = store.lock().await;
+    //Access the Store object first by acquiring a write lock
+    let mut store = store.lock().await;
 
-    // Access the questions Arc<Mutex<HashMap>> and then acquire a write lock
-    let mut questions = store.questions.lock().await;
-    // Update the question in the HashMap
-    questions.insert(question_id, updated_question);
+    //Update the question in the HashMap
+    if store.questions.contains_key(&question_id) {
+        store.questions.insert(question_id, updated_question);
+    }
 
-    // Return a response
+    //Return a response
     Response::builder()
         .status(StatusCode::OK)
         .body("Question updated".to_string())
         .unwrap()
 }
 
-// Handler to delete a question
+//Handler to delete a question
 async fn delete_question(
-    Path(id): Path<String>,
+    Path(question_id): Path<QuestionId>,
     State(store): State<Arc<Mutex<Store>>>,
 ) -> impl IntoResponse {
-    let store = store.lock().await;
-    let mut questions = store.questions.lock().await;
-    if questions.remove(&QuestionId(id)).is_some() {
-        Response::builder()
-            .status(StatusCode::OK)
-            .body("Question deleted".to_string())
-            .unwrap()
+    let mut store = store.lock().await;
+
+    //Check if the question exists and remove it
+    if store.questions.remove(&question_id).is_some() {
+        //Return success message
+        (
+            StatusCode::OK,
+            Json(json!({"message": "Question deleted successfully"})),
+        )
     } else {
-        Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body("Question not found".to_string())
-            .unwrap()
+        //Return an error if the question does not exist
+        (
+            StatusCode::NOT_FOUND,
+            Json(json!({"error": "Question not found"})),
+        )
     }
 }
 
 #[tokio::main]
 async fn main() {
-    let store = Store::new();
+    let store = Arc::new(Mutex::new(Store::new()));
     let app = Router::new()
         .route("/questions", get(get_questions))
         .route("/questions", post(add_question))
         .route("/questions/:id", put(update_question))
         .route("/questions/:id", delete(delete_question))
-        .layer(CorsLayer::new().allow_origin(Any));
-
+        .with_state(store);
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
     println!("Listening on {}", addr);
     Server::bind(&addr)
