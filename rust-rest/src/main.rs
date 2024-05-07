@@ -3,8 +3,9 @@ use axum::{
     http::StatusCode,
     response::{IntoResponse, Response},
     routing::{delete, get, post, put},
-    Json, Router, Server,
+    Extension, Json, Router, Server,
 };
+
 use serde::{Deserialize, Serialize};
 use serde_json;
 use serde_json::json;
@@ -127,25 +128,23 @@ async fn add_question(
 
 // Handler to update an existing question
 async fn update_question(
-    Path(id): Path<String>,
-    Json(question): Json<Question>,
     State(store): State<Arc<RwLock<Store>>>,
+    Path(question_id): Path<QuestionId>,
+    Json(updated_question): Json<Question>,
 ) -> impl IntoResponse {
-    //access the Store object first by acquiring a write lock
+    // Access the Store object first by acquiring a write lock
     let store = store.write().await;
+
+    // Access the questions Arc<RwLock<HashMap>> and then acquire a write lock
     let mut questions = store.questions.write().await;
-    if let Some(q) = questions.get_mut(&QuestionId(id)) {
-        *q = question;
-        Response::builder()
-            .status(StatusCode::OK)
-            .body("Question updated".to_string())
-            .unwrap()
-    } else {
-        Response::builder()
-            .status(StatusCode::NOT_FOUND)
-            .body("Question not found".to_string())
-            .unwrap()
-    }
+    // Update the question in the HashMap
+    questions.insert(question_id, updated_question);
+
+    // Return a response
+    Response::builder()
+        .status(StatusCode::OK)
+        .body("Question updated".to_string())
+        .unwrap()
 }
 
 // Handler to delete a question
@@ -175,7 +174,6 @@ async fn main() {
         .route("/questions", post(add_question))
         .route("/questions/:id", put(update_question))
         .route("/questions/:id", delete(delete_question))
-        //.route("/answers", post(add_answer))
         .layer(CorsLayer::new().allow_origin(Any));
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
