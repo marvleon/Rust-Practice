@@ -7,7 +7,6 @@ use axum::{
 };
 
 use serde::{Deserialize, Serialize};
-use serde_json;
 use serde_json::json;
 use std::collections::HashMap;
 use std::net::SocketAddr;
@@ -56,7 +55,7 @@ impl Store {
 
 #[derive(Debug)]
 enum Error {
-    ParseError(String),
+    ParseE(String),
     MissingParameters,
     QuestionNotFound,
 }
@@ -64,7 +63,7 @@ enum Error {
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         let (status, error_message) = match self {
-            Error::ParseError(e) => (axum::http::StatusCode::BAD_REQUEST, e),
+            Error::ParseE(e) => (axum::http::StatusCode::BAD_REQUEST, e),
             Error::MissingParameters => (
                 axum::http::StatusCode::BAD_REQUEST,
                 "Missing required parameters".to_string(),
@@ -95,15 +94,15 @@ async fn get_questions(
     let start = params
         .get("start")
         .and_then(|v| v.parse::<usize>().ok())
-        .ok_or(Error::ParseError("Invalid start parameter".to_string()))?;
+        .ok_or(Error::ParseE("Invalid start parameter".to_string()))?;
 
     let end = params
         .get("end")
         .and_then(|v| v.parse::<usize>().ok())
-        .ok_or(Error::ParseError("Invalid end parameter".to_string()))?;
+        .ok_or(Error::ParseE("Invalid end parameter".to_string()))?;
 
     if start >= end {
-        return Err(Error::ParseError(
+        return Err(Error::ParseE(
             "End parameter must be greater than start".to_string(),
         ));
     }
