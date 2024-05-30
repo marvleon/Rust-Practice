@@ -16,7 +16,7 @@ use tokio::sync::Mutex;
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct Question {
-    id: QuestionId,
+    id: String,
     title: String,
     content: String,
     tags: Option<Vec<String>>,
@@ -27,9 +27,9 @@ struct QuestionId(String);
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 struct Answer {
-    id: AnswerId,
+    id: String,
     content: String,
-    question_id: QuestionId,
+    question_id: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -37,7 +37,7 @@ struct AnswerId(String);
 
 #[derive(Clone)]
 struct Store {
-    questions: HashMap<QuestionId, Question>,
+    questions: HashMap<String, Question>,
 }
 
 impl Store {
@@ -47,7 +47,7 @@ impl Store {
         }
     }
 
-    fn init() -> HashMap<QuestionId, Question> {
+    fn init() -> HashMap<String, Question> {
         let file = include_str!("../questions.json");
         serde_json::from_str(file).expect("can't read questions.json")
     }
@@ -137,7 +137,7 @@ async fn add_question(
 // Handler to update an existing question
 async fn update_question(
     State(store): State<Arc<Mutex<Store>>>,
-    Path(question_id): Path<QuestionId>,
+    Path(question_id): Path<String>,
     Json(updated_question): Json<Question>,
 ) -> impl IntoResponse {
     //Access the Store object first by acquiring a write lock
@@ -157,7 +157,7 @@ async fn update_question(
 
 //Handler to delete a question
 async fn delete_question(
-    Path(question_id): Path<QuestionId>,
+    Path(question_id): Path<String>,
     State(store): State<Arc<Mutex<Store>>>,
 ) -> impl IntoResponse {
     let mut store = store.lock().await;
@@ -183,9 +183,9 @@ async fn main() {
     let store = Arc::new(Mutex::new(Store::new()));
     let app = Router::new()
         .route("/questions", get(get_questions))
-        .route("/questions", post(add_question))
-        .route("/questions/:id", put(update_question))
-        .route("/questions/:id", delete(delete_question))
+        .route("/add_question", post(add_question))
+        .route("/update_question/:id", put(update_question))
+        .route("/delete_questions/:id", delete(delete_question))
         .with_state(store);
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
     println!("Listening on {}", addr);
