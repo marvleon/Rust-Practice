@@ -79,9 +79,15 @@ impl IntoResponse for Error {
     }
 }
 
+//Handler for questions
+async fn questions(State(store): State<Arc<Mutex<Store>>>) -> Result<Json<Vec<Question>>, Error> {
+    let store = store.lock().await;
+    let questions = store.questions.values().cloned().collect();
+    Ok(Json(questions))
+}
+
 // Hanlder for get_questions
-// Hanlder for get_questions
-async fn get_questions(
+async fn get_question(
     Query(params): Query<HashMap<String, String>>,
     State(store): State<Arc<Mutex<Store>>>,
 ) -> Result<Json<Vec<Question>>, Error> {
@@ -182,7 +188,8 @@ async fn delete_question(
 async fn main() {
     let store = Arc::new(Mutex::new(Store::new()));
     let app = Router::new()
-        .route("/questions", get(get_questions))
+        .route("/questions", get(questions))
+        .route("/question", get(get_question))
         .route("/add_question", post(add_question))
         .route("/update_question/:id", put(update_question))
         .route("/delete_questions/:id", delete(delete_question))
