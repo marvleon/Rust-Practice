@@ -8,11 +8,11 @@ use axum::{
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sqlx::PgPool;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
-//use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct Question {
@@ -38,18 +38,27 @@ struct AnswerId(String);
 #[derive(Clone)]
 struct Store {
     questions: HashMap<String, Question>,
+    pool: PgPool,
 }
 
 impl Store {
-    fn new() -> Self {
-        Store {
-            questions: (Self::init()),
-        }
+    //constructor for creating an instance of store
+    async fn new(pool: PgPool) -> Self {
+        let questions = Self::init(&pool).await;
+        Store { questions, pool }
     }
 
-    fn init() -> HashMap<String, Question> {
-        let file = include_str!("../questions.json");
-        serde_json::from_str(file).expect("can't read questions.json")
+    async fn init(pool: &PgPool) -> HashMap<String, Question> {
+        let mut questions = HashMap::new();
+        //returns a Result<Vec<Question>
+        let records = sqlx::query_as!(Question, "SELECT id, title, content, tags FROM questions")
+            .fetch_all(pool)
+            .await
+            .expect("Failed to fetch questions");
+        for record in records {
+            questions.insert(record.id.clone(), record);
+        }
+        questions
     }
 }
 
@@ -129,6 +138,16 @@ async fn add_question(
 ) -> impl IntoResponse {
     //Access the Store object first by acquiring a write lock
     let mut store = store.lock().await;
+    sqlx::query!(
+        "INSERT INTO questions (id, title, content, tags) VALUES ($1, $2, $3, $4)",
+        question.id,
+        question.title,
+        question.content,
+        question.tags.as_deref()
+    )
+    .execute(&store.pool)
+    .await
+    .expect("Failed to insert question");
 
     //Insert the question into the HashMap
     store.questions.insert(question.id.clone(), question);
@@ -186,14 +205,22 @@ async fn delete_question(
 
 #[tokio::main]
 async fn main() {
-    let store = Arc::new(Mutex::new(Store::new()));
+    dotenv::dotenv().ok();
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let pool = PgPool::connect(&database_url)
+        .await
+        .expect("Failed to connect to the database");
+
+    let store = Store::new(pool).await; // Store::new is an async function and should be awaited
+    let shared_store = Arc::new(Mutex::new(store)); // Wrap the store in Mutex, then in Arc
+
     let app = Router::new()
         .route("/questions", get(questions))
         .route("/question", get(get_question))
         .route("/add_question", post(add_question))
         .route("/update_question/:id", put(update_question))
         .route("/delete_questions/:id", delete(delete_question))
-        .with_state(store);
+        .with_state(shared_store);
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
     println!("Listening on {}", addr);
     Server::bind(&addr)
