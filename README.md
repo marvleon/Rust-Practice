@@ -37,7 +37,7 @@ access the default address `127.0.0.1:3030` and be sure to use the endpointslike
 `127.0.0.1:3000/question?start=0&end=5"` to paginate questions.
 
 
-### Mysql on macos
+### PostgreSQL on macos
 `brew install postgresql`\
 `brew services start postgresql`\
 `brew services stop postgresql`
