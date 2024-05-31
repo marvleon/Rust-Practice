@@ -42,10 +42,10 @@ access the default address `127.0.0.1:3030` and be sure to use the endpointslike
 `brew services start postgresql`\
 `brew services stop postgresql`
 
-###Use .env file for psql credentials
+### Use .env file for psql credentials
 `DATABASE_URL=postgres://test_role:your_password@localhost/yourdatabase`
 
-###Table creation
+### Table creation
 ````
 CREATE TABLE questions (
   id TEXT PRIMARY KEY,
@@ -55,7 +55,7 @@ CREATE TABLE questions (
   created_on TIMESTAMP NOT NULL DEFAULT NOW()
 );
 ````
-###Connect to database
+### Connect to database
 `psql mydatabase`\
 Create role\
 `CREATE ROLE test_role WITH LOGIN PASSWORD 'password'`;\
@@ -64,7 +64,7 @@ Grant privileges\
 `GRANT SELECT ON questions TO test_role;`\
 `GRANT INSERT, UPDATE, DELETE ON questions TO test_role;`\
 
-###Curl to insert into the database\
+### Curl to insert into the database\
 `curl -X POST http://127.0.0.1:3030/add_question \
 -H "Content-Type: application/json" \
 -d '{"id": "1", "title": "New Question", "content": "What is Rust?", "tags": ["programming", "rust", \ "systems programming"]}'`
