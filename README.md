@@ -57,14 +57,16 @@ CREATE TABLE questions (
 ````
 ### Connect to database
 `psql mydatabase`\
-Create role\
-`CREATE ROLE test_role WITH LOGIN PASSWORD 'password'`;\
-Grant privileges\
+*Create role*\
+`CREATE ROLE test_role WITH LOGIN PASSWORD 'password';`\
+*Grant privileges*\
 `GRANT ALL PRIVILEGES ON DATABASE mydatabase TO test_role;`\
 `GRANT SELECT ON questions TO test_role;`\
-`GRANT INSERT, UPDATE, DELETE ON questions TO test_role;`\
+`GRANT INSERT, UPDATE, DELETE ON questions TO test_role;`
 
-### Curl to insert into the database\
-`curl -X POST http://127.0.0.1:3030/add_question \
+### Curl to insert into the database
+````
+curl -X POST http://127.0.0.1:3030/add_question \
 -H "Content-Type: application/json" \
--d '{"id": "1", "title": "New Question", "content": "What is Rust?", "tags": ["programming", "rust", \ "systems programming"]}'`
+-d '{"id": "1", "title": "New Question", "content": "What is Rust?", "tags": ["programming", "rust", \ "systems programming"]}' \
+````
