@@ -32,8 +32,8 @@ This project is a RESTful API developed in Rust, using the Axum framework. It pr
 
 Clone the repository to your local machine:
 use `cargo run` 
-access the default address `127.0.0.1:3030` and be sure to use the endpointslike `127.0.0.1:3030/questions` to retrieve all questions in the PostgreSQL database.
-`127.0.0.1:3030/add_question` to add a question to the PostgreSQL database.
+access the default address `127.0.0.1:3030` and be sure to use the endpointslike `127.0.0.1:3030/questions` to retrieve all questions in the PostgreSQL database.\
+`127.0.0.1:3030/add_question` to add a question to the PostgreSQL database.\
 `127.0.0.1:3000/question?start=0&end=5"` to paginate questions.
 
 
