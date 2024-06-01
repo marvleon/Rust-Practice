@@ -88,14 +88,14 @@ impl IntoResponse for Error {
     }
 }
 
-//Handler for questions
+//Handler to get ALL questions
 async fn questions(State(store): State<Arc<Mutex<Store>>>) -> Result<Json<Vec<Question>>, Error> {
     let store = store.lock().await;
     let questions = store.questions.values().cloned().collect();
     Ok(Json(questions))
 }
 
-// Hanlder for get_questions
+// Hanlder for get_questions to get paginated questions
 async fn get_question(
     Query(params): Query<HashMap<String, String>>,
     State(store): State<Arc<Mutex<Store>>>,
@@ -168,6 +168,18 @@ async fn update_question(
     //Access the Store object first by acquiring a write lock
     let mut store = store.lock().await;
 
+    // Execute the SQL update query
+    sqlx::query!(
+        "UPDATE questions SET title = $2, content = $3, tags = $4 WHERE id = $1",
+        question_id,
+        updated_question.title,
+        updated_question.content,
+        updated_question.tags.as_deref()
+    )
+    .execute(&store.pool)
+    .await
+    .expect("Failed to update question");
+
     //Update the question in the HashMap
     if store.questions.contains_key(&question_id) {
         store.questions.insert(question_id, updated_question);
@@ -186,6 +198,12 @@ async fn delete_question(
     State(store): State<Arc<Mutex<Store>>>,
 ) -> impl IntoResponse {
     let mut store = store.lock().await;
+
+    // Execute the SQL delete query
+    sqlx::query!("DELETE FROM questions WHERE id = $1", question_id)
+        .execute(&store.pool)
+        .await
+        .expect("Failed to delete question");
 
     //Check if the question exists and remove it
     if store.questions.remove(&question_id).is_some() {
