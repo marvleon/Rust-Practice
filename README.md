@@ -16,7 +16,7 @@ This project is a RESTful API developed in Rust, using the Axum framework. It pr
   - `content`: The detailed content of the question - `string`.
   - `tags`: Optional list of tags related to the question - (`Option<Vec<String>>`).
 
-- **Store Struct**: This struct acts as storage for questions, using a `HashMap<String, Question>` to map question IDs (`string`) to their respective `Question` structs. It also uses a `PgPool` type connecting the API to a PostgreSQL database to allow for **persistent data storage**. All API actions interface with the PostrgeSQL database as well as the local hashmap. The local hashmap allows for faster access times and reduces the amount of times querying the database is necessary. This means only one large query is required on startup to load the hashmap.
+- **Store Struct**: This struct acts as storage for questions, using a `HashMap<String, Question>` to map question IDs (`string`) to their respective `Question` structs. It also uses a `PgPool` type connecting the API to a PostgreSQL database to allow for **persistent data storage**. All API actions interface with the PostgreSQL database as well as the local hashmap. The local hashmap allows for faster access times and reduces the amount of times querying the database. The PostgreSQL database ensures all data from the app is stored, even when it goes offline.
 
 - **PostgreSQL and SQLX**: The program now supports a persistent database using PostgreSQL. Please refer to the Installation seciton below to see how to setup your own database and send curls to add data to the DB. 
 
