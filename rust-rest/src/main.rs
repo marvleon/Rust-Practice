@@ -5,7 +5,7 @@ use axum::{
     routing::{delete, get, post, put},
     Json, Router, Server,
 };
-
+use http::HeaderValue;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::PgPool;
@@ -13,6 +13,7 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tower_http::cors::{Any, CorsLayer};
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct Question {
@@ -232,12 +233,18 @@ async fn main() {
     let store = Store::new(pool).await; // Store::new is an async function and should be awaited
     let shared_store = Arc::new(Mutex::new(store)); // Wrap the store in Mutex, then in Arc
 
+    let cors = CorsLayer::new()
+        .allow_origin(HeaderValue::from_static("http://127.0.0.1:9090"))
+        .allow_methods(Any)
+        .allow_headers(Any);
+
     let app = Router::new()
         .route("/questions", get(questions))
         .route("/question", get(get_question))
         .route("/add_question", post(add_question))
         .route("/update_question/:id", put(update_question))
         .route("/delete_questions/:id", delete(delete_question))
+        .layer(cors)
         .with_state(shared_store);
     let addr = SocketAddr::from(([127, 0, 0, 1], 3030));
     println!("Listening on {}", addr);

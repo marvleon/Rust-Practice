@@ -7,9 +7,10 @@ edition = "2021"
 
 [dependencies]
 axum = "0.6"
+http = "0.2"
 tokio = { version = "1.2", features = ["full"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0"}
-tower-http = {version = "0.3", features = ["full"] }
+tower-http = {version = "0.3", features = ["full", "cors"] }
 sqlx = { version = "0.6", features = ["postgres", "migrate", "runtime-tokio-rustls"] }
 dotenv = "0.15"
