@@ -23,6 +23,8 @@ This project is a RESTful API developed in Rust, using the Axum framework. It pr
 
 - **PostgreSQL and SQLX**: The program now supports a persistent database using PostgreSQL. Please refer to the Installation seciton below to see how to setup your own database and send curls to add data to the DB.
 
+- **Yew Frontend**: The program now has a frontend using the Yew framework. The frontend located in the `/rust-yew` directory uses reqwasm to utilize the backend endpoints and Yew manages and builds the necessary frontend components.
+
 ## Getting Started
 
 ### Prerequisites
@@ -30,16 +32,55 @@ This project is a RESTful API developed in Rust, using the Axum framework. It pr
 - Rust
 - Cargo
 - PostgreSQL
+- Trunk
+- Wasm-Bindgen-cli
+- rustup target add wasm32-unknown-unknown
 
 ## Installation
 
-Clone the repository to your local machine:
-use `cargo run`
-access the default address `127.0.0.1:3030` and be sure to use the endpointslike `127.0.0.1:3030/questions` to retrieve all questions in the PostgreSQL database.\
-`127.0.0.1:3030/add_question` to add a question to the PostgreSQL database.\
-`127.0.0.1:3000/question?start=0&end=5"` to paginate questions.
+- Clone the repository to your local machine
+- Install the following dependencies
 
-### PostgreSQL on macos
+```
+cargo install trunk
+cargo install wasm-pack
+cargo install wasm-bindgen-cli
+rustup target add wasm32-unknown-unknown
+brew install postgresql
+```
+
+- _postgresql assumes brew has already been installed on macos system._
+- _see below how to configure postgresql to setup the database server_
+
+## Running Backend
+
+```
+cargo build
+cargo run
+```
+
+- access the default address `127.0.0.1:3030` and be sure to use the endpoints like `127.0.0.1:3030/questions` to retrieve all questions in the PostgreSQL database.\
+  `127.0.0.1:3030/add_question` to add a question to the PostgreSQL database.\
+  `127.0.0.1:3000/question?start=0&end=5"` to paginate questions.
+
+### Curl to insert into the database
+
+```
+curl -X POST http://127.0.0.1:3030/add_question \
+-H "Content-Type: application/json" \
+-d '{"id": "1", "title": "New Question", "content": "What is Rust?", "tags": ["programming", "rust", \ "systems programming"]}' \
+```
+
+## Running Frontend in Development
+
+```
+cargo build
+trunk serve
+```
+
+_For production run_ `trunk build` _to generate _
+
+## PostgreSQL on macos
 
 `brew install postgresql`\
 `brew services start postgresql`\
@@ -71,10 +112,6 @@ _Grant privileges_\
 `GRANT SELECT ON questions TO test_role;`\
 `GRANT INSERT, UPDATE, DELETE ON questions TO test_role;`
 
-### Curl to insert into the database
+# More info
 
-```
-curl -X POST http://127.0.0.1:3030/add_question \
--H "Content-Type: application/json" \
--d '{"id": "1", "title": "New Question", "content": "What is Rust?", "tags": ["programming", "rust", \ "systems programming"]}' \
-```
+Trunk is a Rust WebAssembly app bundler and build tool that handles compiling WASM and linking other resources. It automates things like setting up the correct cratetype, packaging, and serving the project. When trunk serve is executed, it performs the build process and then serves the application locally. The output in `dist` directory includes the compiled .wasm file (the application compiled into WebAssembly), the javascript glue code (responsible for loading the .wasm file), and index.html file which includes the necessary references to the javascript glue code and any other assets. For production, `trunk build` will generate the previously mentioned production ready files in the `dist` directory. In theory, we can deploy these files in the production server.
