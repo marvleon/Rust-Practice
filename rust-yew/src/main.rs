@@ -4,13 +4,11 @@ use serde::Deserialize;
 use web_sys::console;
 
 
-
 #[function_component(App)]
 fn app() -> Html {
-    let questions = use_state(|| vec![]);
+    let questions = use_state(Vec::new);
     let start = use_state(|| 0);
     let end = use_state(|| 1);
-
 
     let on_click_show_all = {
         let questions = questions.clone();
@@ -109,7 +107,6 @@ let on_click_paginate = {
         <div>
             <marquee>{ "WORK IN PROGRESS" }</marquee>
             <h1 style="text-align:center;">{ "Marvin's Rust Web App" }</h1>
-            <div>{ "Empty container for future forms" }</div>
             <div>{ "Empty container for future forms" }</div>
             <div>
                 <button onclick={on_click_show_all}>{ "Show All Questions" }</button>
