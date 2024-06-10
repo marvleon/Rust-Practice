@@ -68,7 +68,7 @@ cargo run
 ```
 curl -X POST http://127.0.0.1:3030/add_question \
 -H "Content-Type: application/json" \
--d '{"id": "1", "title": "New Question", "content": "What is Rust?", "tags": ["programming", "rust", \ "systems programming"]}' \
+-d '{"id": "1", "title": "New Question", "content": "What is Rust?", "tags": ["programming", "rust", \ "systems programming"]}'
 ```
 
 ## Running Frontend in Development
@@ -78,7 +78,7 @@ cargo build
 trunk serve
 ```
 
-_For production run_ `trunk build` _to generate _
+_For production run_ `trunk build` _to generate_
 
 ## PostgreSQL on macos
 
