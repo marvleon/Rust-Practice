@@ -15,6 +15,11 @@ fn app() -> Html {
     let title = use_state(String::new); 
     let content = use_state(String::new); 
     let tags = use_state(Vec::new);
+
+    let update_question_id = use_state(String::new);
+    let update_title = use_state(String::new);
+    let update_content = use_state(String::new);
+    let update_tags = use_state(Vec::new);
     
     let on_id_add = {
         let question_id = question_id.clone();
@@ -120,6 +125,81 @@ fn app() -> Html {
         })
     };
 
+    let on_id_update = {
+        let update_question_id = update_question_id.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            update_question_id.set(input.value());
+        })
+    };
+
+    let on_title_update = {
+        let update_title = update_title.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            update_title.set(input.value());
+        })
+    };
+
+    let on_content_update = {
+        let update_content = update_content.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            update_content.set(input.value());
+        })
+    };
+
+    let on_tags_update = {
+        let update_tags = update_tags.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            let tags_list = input.value().split(',').map(String::from).collect();
+            update_tags.set(tags_list);
+        })
+    };
+
+    let on_update_submit = {
+        let update_question_id = update_question_id.clone();
+        let update_title = update_title.clone();
+        let update_content = update_content.clone();
+        let update_tags = update_tags.clone();
+        Callback::from(move |e: FocusEvent| {
+            e.prevent_default();
+            let data = serde_json::json!({
+                "id": (*update_question_id).clone(),
+                "title": (*update_title).clone(),
+                "content": (*update_content).clone(),
+                "tags": (*update_tags).clone()
+            });
+            wasm_bindgen_futures::spawn_local({
+                let update_question_id = update_question_id.clone();
+                async move {
+                    let url = format!("http://127.0.0.1:3030/update_question/{}", (*update_question_id).clone());
+                    match Request::put(&url)
+                        .header("Content-Type", "application/json")
+                        .body(data.to_string())
+                        .send()
+                        .await {
+                        Ok(response) => {
+                            if response.ok() {
+                                console::log_1(&"Question updated successfully".into());
+                            } else {
+                                let status = response.status();
+                                let status_text = response.status_text();
+                                console::error_1(&format!("Failed to update question - Server responded with {}: {}", status, status_text).into());
+                            }
+                        }
+                        Err(err) => {
+                            console::error_1(&format!("Error sending request: {:?}", err).into());
+                        }
+                    }
+                }
+            });
+        })
+    };
+    
+    
+    
     let on_click_show_all = {
         let questions = questions.clone();
         Callback::from(move |_| {
@@ -217,36 +297,60 @@ let on_click_paginate = {
         <div>
             <marquee>{ "WORK IN PROGRESS" }</marquee>
             <h1 style="text-align:center;">{ "Marvin's Rust Web App" }</h1>
-            <div>
-                <form onsubmit={on_add_submit}>
-                    <input type="text" placeholder="ID" oninput={on_id_add} />
-                    <input type="text" placeholder="Title" oninput={on_title_add} />
-                    <input type="text" placeholder="Content" oninput={on_content_add} />
-                    <input type="text" placeholder="Tags (comma-separated)" oninput={on_tags_add} />
-                    <button type="submit">{ "Add Question" }</button>
-                </form>
+            
+            <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <div style="margin: 0 20px; padding: 10px;">
+                    <h3 style="text-align: center;">{ "ADD QUESTION" }</h3>
+                    <form onsubmit={on_add_submit}>
+                        <input type="text" placeholder="ID" oninput={on_id_add} />
+                        <input type="text" placeholder="Title" oninput={on_title_add} />
+                        <input type="text" placeholder="Content" oninput={on_content_add} />
+                        <input type="text" placeholder="Tags (comma-separated)" oninput={on_tags_add} />
+                        <button type="submit">{ "Add Question" }</button>
+                    </form>
+                </div>
+                <div style="margin: 0 20px; padding: 10px;">
+                    <h3 style="text-align: center;">{ "UPDATE QUESTION" }</h3>
+                    <form onsubmit={on_update_submit}>
+                        <input type="text" placeholder="Update ID" oninput={on_id_update} />
+                        <input type="text" placeholder="Update Title" oninput={on_title_update} />
+                        <input type="text" placeholder="Update Content" oninput={on_content_update} />
+                        <input type="text" placeholder="Update Tags (comma-separated)" oninput={on_tags_update} />
+                        <button type="submit">{ "Update Question" }</button>
+                    </form>
+                </div>
             </div>
-            <div>
+    
+            <div style="border: 2px solid red; padding: 10px; margin-bottom: 20px;">
                 <form onsubmit={on_delete_submit}>
                     <input type="text" placeholder="Enter ID to delete" oninput={on_delete_id_input} />
                     <button type="submit">{ "Delete Question" }</button>
                 </form>
             </div>
+    
             <div>
                 <form onsubmit={on_click_paginate}>
                     <input type="number" placeholder="Start" oninput={on_start_input} />
                     <input type="number" placeholder="End" oninput={on_end_input} />
                     <button type="submit">{ "Paginate" }</button>
                 </form>
+            </div>
+    
+            <div style="text-align: center; margin-bottom: 20px;">
                 <button onclick={on_click_show_all}>{ "Show All Questions" }</button>
+            </div>
+    
+            <div style="text-align: center;">
                 <h2>{ "Questions" }</h2>
                 <ul>
                     { for questions.iter().map(|q| html! { <li>{ format!("{} - {}", q.title, q.content) }</li> }) }
                 </ul>
             </div>
+    
             <marquee>{ "WORK IN PROGRESS" }</marquee>
         </div>
     }
+    
 }
 
 
