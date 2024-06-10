@@ -10,10 +10,10 @@ fn app() -> Html {
     let questions = use_state(Vec::new);
     let start = use_state(|| 0);
     let end = use_state(|| 1);
-    let delete_id = use_state(|| "".to_string()); // State for deletion ID
-    let question_id = use_state(|| "".to_string());
-    let title = use_state(|| "".to_string());
-    let content = use_state(|| "".to_string());
+    let delete_id = use_state(String::new); // directly initializing with String::new
+    let question_id = use_state(String::new); 
+    let title = use_state(String::new); 
+    let content = use_state(String::new); 
     let tags = use_state(Vec::new);
     
     let on_id_change = {
