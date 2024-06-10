@@ -49,7 +49,7 @@ fn app() -> Html {
         })
     };
 
-    let on_form_submit = {
+    let on_add_submit = {
         let question_id = question_id.clone();
         let title = title.clone();
         let content = content.clone();
@@ -218,7 +218,7 @@ let on_click_paginate = {
             <marquee>{ "WORK IN PROGRESS" }</marquee>
             <h1 style="text-align:center;">{ "Marvin's Rust Web App" }</h1>
             <div>
-                <form onsubmit={on_form_submit}>
+                <form onsubmit={on_add_submit}>
                     <input type="text" placeholder="ID" oninput={on_id_add} />
                     <input type="text" placeholder="Title" oninput={on_title_add} />
                     <input type="text" placeholder="Content" oninput={on_content_add} />
