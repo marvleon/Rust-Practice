@@ -16,7 +16,7 @@ fn app() -> Html {
     let content = use_state(String::new); 
     let tags = use_state(Vec::new);
     
-    let on_id_change = {
+    let on_id_add = {
         let question_id = question_id.clone();
         Callback::from(move |e: InputEvent| {
             let input: web_sys::HtmlInputElement = e.target_unchecked_into();
@@ -24,7 +24,7 @@ fn app() -> Html {
         })
     };
     
-    let on_title_change = {
+    let on_title_add = {
         let title = title.clone();
         Callback::from(move |e: InputEvent| {
             let input: web_sys::HtmlInputElement = e.target_unchecked_into();
@@ -32,7 +32,7 @@ fn app() -> Html {
         })
     };
     
-    let on_content_change = {
+    let on_content_add = {
         let content = content.clone();
         Callback::from(move |e: InputEvent| {
             let input: web_sys::HtmlInputElement = e.target_unchecked_into();
@@ -40,7 +40,7 @@ fn app() -> Html {
         })
     };
     
-    let on_tags_change = {
+    let on_tags_add = {
         let tags = tags.clone();
         Callback::from(move |e: InputEvent| {
             let input: web_sys::HtmlInputElement = e.target_unchecked_into();
@@ -219,10 +219,10 @@ let on_click_paginate = {
             <h1 style="text-align:center;">{ "Marvin's Rust Web App" }</h1>
             <div>
                 <form onsubmit={on_form_submit}>
-                    <input type="text" placeholder="ID" oninput={on_id_change} />
-                    <input type="text" placeholder="Title" oninput={on_title_change} />
-                    <input type="text" placeholder="Content" oninput={on_content_change} />
-                    <input type="text" placeholder="Tags (comma-separated)" oninput={on_tags_change} />
+                    <input type="text" placeholder="ID" oninput={on_id_add} />
+                    <input type="text" placeholder="Title" oninput={on_title_add} />
+                    <input type="text" placeholder="Content" oninput={on_content_add} />
+                    <input type="text" placeholder="Tags (comma-separated)" oninput={on_tags_add} />
                     <button type="submit">{ "Add Question" }</button>
                 </form>
             </div>
