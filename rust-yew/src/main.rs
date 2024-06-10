@@ -2,6 +2,7 @@ use yew::prelude::*;
 use reqwasm::http::Request;
 use serde::Deserialize;
 use web_sys::console;
+use urlencoding::encode;
 
 
 #[function_component(App)]
@@ -9,6 +10,42 @@ fn app() -> Html {
     let questions = use_state(Vec::new);
     let start = use_state(|| 0);
     let end = use_state(|| 1);
+    let delete_id = use_state(|| "".to_string()); // State for deletion ID
+    
+    
+    // Callback to handle delete ID input
+    let on_delete_id_input = {
+        let delete_id = delete_id.clone();
+        Callback::from(move |e: InputEvent| {
+            let input: web_sys::HtmlInputElement = e.target_unchecked_into();
+            delete_id.set(input.value());
+        })
+    };
+
+    // Callback for form submission to delete a question
+    let on_delete_submit = {
+        let delete_id = delete_id.clone();
+        Callback::from(move |e: FocusEvent| {
+            e.prevent_default(); // Prevent the form from actually submitting
+            let id = delete_id.to_string();
+            wasm_bindgen_futures::spawn_local(async move {
+                let url = format!("http://127.0.0.1:3030/delete_questions/{}", encode(&id));
+                match Request::delete(&url).send().await {
+                    Ok(response) => {
+                        if response.ok() {
+                            console::log_1(&"Question deleted successfully".into());
+                        } else {
+                            console::error_1(&"Failed to delete the question".into());
+                        }
+                    }
+                    Err(err) => {
+                        console::error_1(&"Error sending delete request".into());
+                        console::error_1(&format!("{:?}", err).into());
+                    }
+                }
+            });
+        })
+    };
 
     let on_click_show_all = {
         let questions = questions.clone();
@@ -107,14 +144,19 @@ let on_click_paginate = {
         <div>
             <marquee>{ "WORK IN PROGRESS" }</marquee>
             <h1 style="text-align:center;">{ "Marvin's Rust Web App" }</h1>
-            <div>{ "Empty container for future forms" }</div>
             <div>
-                <button onclick={on_click_show_all}>{ "Show All Questions" }</button>
+                <form onsubmit={on_delete_submit}>
+                    <input type="text" placeholder="Enter ID to delete" oninput={on_delete_id_input} />
+                    <button type="submit">{ "Delete Question" }</button>
+                </form>
+            </div>
+            <div>
                 <form onsubmit={on_click_paginate}>
                     <input type="number" placeholder="Start" oninput={on_start_input} />
                     <input type="number" placeholder="End" oninput={on_end_input} />
                     <button type="submit">{ "Paginate" }</button>
                 </form>
+                <button onclick={on_click_show_all}>{ "Show All Questions" }</button>
                 <h2>{ "Questions" }</h2>
                 <ul>
                     { for questions.iter().map(|q| html! { <li>{ format!("{} - {}", q.title, q.content) }</li> }) }
