@@ -62,6 +62,7 @@ cargo run
 - access the default address `127.0.0.1:3030` and be sure to use the endpoints like `127.0.0.1:3030/questions` to retrieve all questions in the PostgreSQL database.\
   `127.0.0.1:3030/add_question` to add a question to the PostgreSQL database.\
   `127.0.0.1:3030/question?start=0&end=1` to paginate questions.
+  `127.0.0.1:3030/delete_questions/to%20be%20deleted` to delete a question.
 
 ### Curl to insert into the database
 
