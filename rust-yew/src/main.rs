@@ -11,42 +11,6 @@ fn app() -> Html {
     let start = use_state(|| 0);
     let end = use_state(|| 1);
 
-    {
-        let questions = questions.clone();
-        let start = *start;
-        let end = *end;
-        use_effect_with_deps(move |_| {
-            let questions = questions.clone();
-            wasm_bindgen_futures::spawn_local(async move {
-                let url = format!("http://127.0.0.1:3030/questions?start={}&end={}", start, end);
-                match Request::get(&url).send().await {
-                    Ok(response) => {
-                        if response.ok() {
-                            match response.json::<Vec<Question>>().await {
-                                Ok(fetched_questions) => {
-                                    console::log_1(&"Questions fetched successfully".into());
-                                    console::log_1(&format!("{:?}", fetched_questions).into());
-                                    questions.set(fetched_questions);
-                                }
-                                Err(err) => {
-                                    console::error_1(&"Failed to parse JSON".into());
-                                    console::error_1(&format!("{:?}", err).into());
-                                }
-                            }
-                        } else {
-                            console::error_1(&"Request failed".into());
-                        }
-                    }
-                    Err(err) => {
-                        console::error_1(&"Failed to fetch questions".into());
-                        console::error_1(&format!("{:?}", err).into());
-                    }
-                }
-            });
-            || ()
-        }, (start, end));
-    }
-
 
     let on_click_show_all = {
         let questions = questions.clone();
