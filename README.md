@@ -25,6 +25,17 @@ This project is a RESTful API developed in Rust, using the Axum framework. It pr
 
 - **Yew Frontend**: The program now has a frontend using the Yew framework. The frontend located in the `/rust-yew` directory uses reqwasm to utilize the backend endpoints and Yew manages and builds the necessary frontend components.
 
+## Screenshots
+
+![Add question](./screenshots/add.png)
+_example of how to add a question to the app._
+
+![Update question](./screenshots/update.png)
+_example of how to update an existing question._
+
+![Paginate question](./screenshots/paginate.png)
+_example of how to paginate questions._
+
 ## Getting Started
 
 ### Prerequisites
