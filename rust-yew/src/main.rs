@@ -10,7 +10,7 @@ fn app() -> Html {
     let questions = use_state(Vec::new);
     let start = use_state(|| 0);
     let end = use_state(|| 1);
-    let delete_id = use_state(String::new); // directly initializing with String::new
+    let delete_id = use_state(String::new); 
     let question_id = use_state(String::new); 
     let title = use_state(String::new); 
     let content = use_state(String::new); 
@@ -21,6 +21,7 @@ fn app() -> Html {
     let update_content = use_state(String::new);
     let update_tags = use_state(Vec::new);
     
+    // Callback for updating question_id state on input event
     let on_id_add = {
         let question_id = question_id.clone();
         Callback::from(move |e: InputEvent| {
@@ -29,6 +30,7 @@ fn app() -> Html {
         })
     };
     
+    // Callback for updating title state on input event
     let on_title_add = {
         let title = title.clone();
         Callback::from(move |e: InputEvent| {
@@ -36,7 +38,8 @@ fn app() -> Html {
             title.set(input.value());
         })
     };
-    
+   
+    // Callback for updating content state on input event
     let on_content_add = {
         let content = content.clone();
         Callback::from(move |e: InputEvent| {
@@ -45,6 +48,7 @@ fn app() -> Html {
         })
     };
     
+    // Callback for updating tags state on input event
     let on_tags_add = {
         let tags = tags.clone();
         Callback::from(move |e: InputEvent| {
@@ -54,6 +58,7 @@ fn app() -> Html {
         })
     };
 
+    // Callback for handling form submission to add a new question
     let on_add_submit = {
         let question_id = question_id.clone();
         let title = title.clone();
@@ -125,6 +130,7 @@ fn app() -> Html {
         })
     };
 
+    // Callback for updating question_id state on input event
     let on_id_update = {
         let update_question_id = update_question_id.clone();
         Callback::from(move |e: InputEvent| {
@@ -133,6 +139,7 @@ fn app() -> Html {
         })
     };
 
+    // Callback for updating title state on input event
     let on_title_update = {
         let update_title = update_title.clone();
         Callback::from(move |e: InputEvent| {
@@ -141,6 +148,7 @@ fn app() -> Html {
         })
     };
 
+    // Callback for updating content state on input event
     let on_content_update = {
         let update_content = update_content.clone();
         Callback::from(move |e: InputEvent| {
@@ -149,6 +157,7 @@ fn app() -> Html {
         })
     };
 
+    // Callback for updating tags state on input event
     let on_tags_update = {
         let update_tags = update_tags.clone();
         Callback::from(move |e: InputEvent| {
@@ -158,6 +167,7 @@ fn app() -> Html {
         })
     };
 
+    // Callback for handling form submission to add a new question
     let on_update_submit = {
         let update_question_id = update_question_id.clone();
         let update_title = update_title.clone();
@@ -199,7 +209,7 @@ fn app() -> Html {
     };
     
     
-    
+    //Shows all
     let on_click_show_all = {
         let questions = questions.clone();
         Callback::from(move |_| {
@@ -232,6 +242,7 @@ fn app() -> Html {
         })
     };
 
+// Callback for handling pagination click event
 let on_click_paginate = {
         let questions = questions.clone();
         let start = start.clone();
@@ -270,6 +281,7 @@ let on_click_paginate = {
         })
     };
 
+    // Callback for updating start state on input event
     let on_start_input = {
         let start = start.clone();
         Callback::from(move |e: InputEvent| {
@@ -281,6 +293,7 @@ let on_click_paginate = {
         })
     };
 
+    // Callback for updating end state on input event   
     let on_end_input = {
         let end = end.clone();
         Callback::from(move |e: InputEvent| {
