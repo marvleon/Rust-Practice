@@ -356,7 +356,15 @@ let on_click_paginate = {
             <div style="text-align: center;">
                 <h2>{ "Questions" }</h2>
                 <ul>
-                    { for questions.iter().map(|q| html! { <li>{ format!("{} - {}", q.title, q.content) }</li> }) }
+                    { for questions.iter().map(|q| html! { <li>
+                        <strong>{ format!("ID: {}", q.id) }</strong>
+                        <div>{ format!("Title: {}", q.title) }</div>
+                        <div>{ format!("Content: {}", q.content) }</div>
+                        <div>{ format!("Tags: {}", match &q.tags {
+                            Some(tags) => tags.join(", "),
+                            None => "No tags".to_string(),
+                        }) }</div>
+                    </li> }) }
                 </ul>
             </div>
     
