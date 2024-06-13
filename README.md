@@ -21,20 +21,18 @@ This project is a RESTful API developed in Rust, using the Axum framework. It pr
 
 - **Store Struct**: This struct acts as storage for questions, using a `HashMap<String, Question>` to map question IDs (`string`) to their respective `Question` structs. It also uses a `PgPool` type connecting the API to a PostgreSQL database to allow for **persistent data storage**. All API actions interface with the PostgreSQL database as well as the local hashmap. The local hashmap allows for faster access times and reduces the amount of times querying the database. The PostgreSQL database ensures all data from the app is stored, even when it goes offline.
 
-- **PostgreSQL and SQLX**: The program now supports a persistent database using PostgreSQL. Please refer to the Installation seciton below to see how to setup your own database and send curls to add data to the DB.
+- **PostgreSQL and SQLX**: The program supports a persistent database using PostgreSQL. Please refer to the Installation section below to see how to setup your own database and send curls to add data to the DB.
 
 - **Yew Frontend**: The program now has a frontend using the Yew framework. The frontend located in the `/rust-yew` directory uses reqwasm to utilize the backend endpoints and Yew manages and builds the necessary frontend components.
 
 ## Screenshots
 
-![Add question](./screenshots/add.png)
 _example of how to add a question to the app._
+![Add question](./screenshots/add.png)
 
 ![Update question](./screenshots/update.png)
 _example of how to update an existing question._
 
-![Paginate question](./screenshots/paginate.png)
-_example of how to paginate questions._
 
 ## Getting Started
 
@@ -73,7 +71,7 @@ cargo run
 - access the default address `127.0.0.1:3030` and be sure to use the endpoints like `127.0.0.1:3030/questions` to retrieve all questions in the PostgreSQL database.\
   `127.0.0.1:3030/add_question` to add a question to the PostgreSQL database.\
   `127.0.0.1:3030/question?start=0&end=1` to paginate questions.
-  `127.0.0.1:3030/delete_questions/to%20be%20deleted` to delete a question.
+  `127.0.0.1:3030/delete_questions/to%20be%20deleted` to delete a question (if there are spaces in the ID use % as shown).
 
 ### Curl to insert into the database
 
@@ -89,8 +87,6 @@ curl -X POST http://127.0.0.1:3030/add_question \
 cargo build
 trunk serve
 ```
-
-_For production run_ `trunk build` _to generate_
 
 ## PostgreSQL on macos
 
