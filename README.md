@@ -1,10 +1,8 @@
-# Rust Web Example
+# rust web practice
 
 ## Marvin Leon
 
-### This repository contains the homework for CS410 Rust Web Development.
-
-# Questions and Answers API
+# _Questions and Answers API_
 
 ## Overview
 
